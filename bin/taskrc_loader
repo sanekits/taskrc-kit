@@ -1,12 +1,12 @@
 # taskrc_loader
+# vim: filetype=sh :
 #
 #  This should be sourced in the shell, it has no value as an external command.  Run 'taskrc.sh' if you want
 # a scriptable thing.
 #
-# vim: filetype=sh :
 #
-#   taskrc is a shell helper for directory-specific 'taskrc' files.  A taskrc file is "your favoritee shell definitions 
-# that are focused on a particular project or task".  
+#   taskrc is a shell helper for directory-specific 'taskrc' files.  A taskrc file is "your favoritee shell definitions
+# that are focused on a particular project or task".
 #
 # Often the taskrc file is saved with a project source code base.
 #
@@ -62,7 +62,7 @@ function register_taskrc {
     local xpath=$(readlink -f $file)
     local xhash=$(echo "$xpath" | md5sum | cut -d ' ' -f 1)
     [[ -L $HOME/.taskrc_reg/$xhash ]] && return
-    mkdir -p $HOME/.taskrc_reg 
+    mkdir -p $HOME/.taskrc_reg
     cd $HOME/.taskrc_reg
     ln -sf "${xpath}" ./${xhash}
     cd - &>/dev/null
@@ -78,7 +78,7 @@ function external_taskrc_call {
     #   1. $taskrc_dir must be defined in the calling environment, we don't attempt to find it
     #   2. $taskrc_dir/taskrc must exist
     #
-    # To make this work, we create a subshell, source taskrc, verify that a function exists matching $1, 
+    # To make this work, we create a subshell, source taskrc, verify that a function exists matching $1,
     # and then eval the full command in that subshell.
     [[ -z $taskrc_dir ]] && return $(errExit "Unknown arguments(0): $@ [no taskrc_dir]" )
     [[ -f $taskrc_dir/taskrc ]] || return $(errExit "Unknown arguments(1): $@ [no taskrc]")
@@ -97,7 +97,7 @@ function external_taskrc_call {
 function taskrc_dir_find {
     local xd="$1"  # start search here
     local search_up=$2 # search parent?
-    
+
     if [[ -r ${xd}/taskrc ]]; then
         echo ${xd}
         true
@@ -112,7 +112,7 @@ function taskrc_dir_find {
     false
 }
 
-function taskrc_v2 {
+function taskrc_v3 {
     local help=false       # -h, --help : print help for this function, then help for most recent taskrc
     local search_up=false  # -s, --search-up : find taskrc by searching parent dirs of .
     local refresh=false    # -r, --refresh : reload most recent taskrc (i.e. to pick up changes)
@@ -123,7 +123,7 @@ function taskrc_v2 {
     local new=false        # -n, --new: create a new taskrc here .
     local edit=false       # -e, --edit: edit current taskrc, then reload
     while [[ ! -z $1 ]]; do
-        case $1 in 
+        case $1 in
             -h|--help)
                 help=true
                 ;;
@@ -176,7 +176,7 @@ function taskrc_v2 {
     if $new; then
         [[ -e ./taskrc && ! $force ]] && return $(errExit "Can't do --new, there's already a taskrc in $PWD")
         if ! taskrc_dir=$PWD taskrc_new; then
-            return 
+            return
         fi
         taskrc_dir=$PWD
         edit=true
@@ -243,7 +243,7 @@ function taskrc_v2 {
             echo " >> done help: [${taskrc_dir}/taskrc]"
         fi
         if $load; then
-            echo "In [$PWD], loading taskrc into current shell:" 
+            echo "In [$PWD], loading taskrc into current shell:"
             source ./taskrc
             taskrc_load_time=$(ctime taskrc)
             echo " >> done, $(cat taskrc | wc -l ) lines sourced."
