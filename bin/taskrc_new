@@ -32,6 +32,9 @@ they will be injected into the shell. Run \`taskrc -h\` for more.
 
 \`\`\`bash
 #  Put your bash code in regions like this.
+#  function hello {
+#      echo "Welcome to hello()!"
+# }
 \`\`\`
 EOF2
 
@@ -53,4 +56,5 @@ if [[ -z $sourceMe ]]; then
             ;;
     esac
 fi
+true
 
