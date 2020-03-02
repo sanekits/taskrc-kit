@@ -1,0 +1,2 @@
+PATH=~/taskrc-kit/bin:$PATH
+alias rf='source ~/taskrc-kit/bin/taskrc_loader'

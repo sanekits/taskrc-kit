@@ -99,9 +99,7 @@ function cat_taskrc {
     [[ -f "$1/taskrc" ]] && cat "$1/taskrc"
 }
 function source_taskrc {
-    set -x
     source <(cat_taskrc $1 )
-    set +x
 }
 
 function taskrc_filename {
@@ -221,7 +219,7 @@ function taskrc_v3 {
         load=false
     fi
     if $new; then
-        [[ -e ./taskrc && ! $force ]] && return $(errExit "Can't do --new, there's already a taskrc in $PWD")
+        [[ -e $(taskrc_filename .) && ! $force ]] && return $(errExit "Can't do --new, there's already a taskrc in $PWD")
         if ! taskrc_dir=$PWD taskrc_new; then
             return
         fi

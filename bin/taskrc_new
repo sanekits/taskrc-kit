@@ -4,19 +4,53 @@
 
 taskrc_dir=${taskrc_dir:-$PWD}
 
-function taskrc_new {
-    echo "# taskrc for $PWD"
-    echo "# vim: filetype=sh :"
-    echo ""
-    echo "#  Use taskrc -h for help on built-in taskrc functions."
-    echo "#  To provide help for definitions in this file, add #Help tags, e.g.:"
-    echo "#    function my_func {"
-    echo "     #Help: my_func is my first and only function..."
-    echo
+function plain_new {
+    cat << EOF
+# taskrc for PWD
+# vim: filetype=sh :
+
+# Use taskrc -h for help on built-in taskrc functions.
+# To provide help for definitions in this file, add #Help tags, e.g.:
+# function my_func {
+    #Help: my_func is my first and only function...
+# }
+EOF
+
+}
+
+function markdown_new {
+
+    cat << EOF2
+## taskrc.md
+\`\`\`
+> Created: $(date)
+> Dir: $PWD
+> User: $USER
+\`\`\`
+Any markdown content can live here.  Embedded bash code blocks can be included,
+they will be injected into the shell. Run \`taskrc -h\` for more.
+
+\`\`\`bash
+#  Put your bash code in regions like this.
+\`\`\`
+EOF2
+
 }
 
 
-cd ${taskrc_dir} || errExit "Can't cd to $taskrc_dir"
-taskrc_new  > taskrc
-
+if [[ -z $sourceMe ]]; then
+    cd ${taskrc_dir} || errExit "Can't cd to $taskrc_dir"
+    read -n 1 -p  "Create new taskrc: [p]lain or [m]arkdown notebook?: "
+    case $REPLY in
+        [pP])
+            plain_new > taskrc
+            ;;
+        [mM])
+            markdown_new > taskrc.md
+            ;;
+        *)
+            exit 1
+            ;;
+    esac
+fi
 
