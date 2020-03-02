@@ -104,6 +104,15 @@ function taskrc_filename {
     echo "$1/taskrc"
 }
 
+function taskrc_linecount {
+    [[ -z "$1" || ! -d $1 ]] && { echo 0 ; return; }
+
+    (
+        [[ -f "$1/taskrc.md" ]] && taskrc_md_filter "$1/taskrc.md"
+        [[ -f "$1/taskrc" ]] && cat "$1/taskrc"
+    ) | wc -l
+}
+
 function external_taskrc_call {
     # If user calls taskrc [args], and [args] are not recognized, then we
     # try to evaluate them as a possible call on a function defined in the current
@@ -134,7 +143,7 @@ function taskrc_dir_find {
     local xd="$1"  # start search here
     local search_up=$2 # search parent?
 
-    if [[ -r ${xd}/taskrc ]]; then
+    if [[ -r $(taskrc_filename $xd) ]]; then
         echo ${xd}
         true
         return
@@ -282,7 +291,7 @@ function taskrc_v3 {
             echo "In [$PWD], loading taskrc into current shell:"
             source_taskrc .
             taskrc_load_time=$(ctime $(taskrc_filename .))
-            echo " >> done, $(taskrc_filename .) sourced."
+            echo " >> done, $(taskrc_linecount .) lines sourced."
         fi
         popd >/dev/null
     fi
