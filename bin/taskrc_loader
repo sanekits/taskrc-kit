@@ -34,7 +34,7 @@ function taskrc_is_dirty {
     local detail=false
     [[ $1 == "-pd" ]] && { print=true; detail=true; }
     [[ $1 == "-p" ]] && print=true
-    local cur=$(ctime ${taskrc_dir}/taskrc)
+    local cur=$(ctime $(taskrc_filename ${taskrc_dir}) )
     if (( $cur > $taskrc_load_time )); then
         if $print; then
             echo -n "dirty"
@@ -76,7 +76,7 @@ function has_taskrc {
 
 function taskrc_md_filter {
     local xo=false;
-    while read line; do
+    while IFS= read -r line; do
         #echo "line=[$line]" >/dev/pts/1
         if $xo; then
             if [[ "$line" == "\`\`\`" ]]; then
@@ -93,10 +93,15 @@ function taskrc_md_filter {
     done < $1
 }
 
-function source_taskrc {
+function cat_taskrc {
     [[ -z "$1" || ! -d $1 ]] && return
-    [[ -f "$1/taskrc.md" ]] && source <(taskrc_md_filter "$1/taskrc.md")
-    [[ -f "$1/taskrc" ]] && source "$1/taskrc"
+    [[ -f "$1/taskrc.md" ]] && taskrc_md_filter "$1/taskrc.md"
+    [[ -f "$1/taskrc" ]] && cat "$1/taskrc"
+}
+function source_taskrc {
+    set -x
+    source <(cat_taskrc $1 )
+    set +x
 }
 
 function taskrc_filename {
@@ -106,11 +111,7 @@ function taskrc_filename {
 
 function taskrc_linecount {
     [[ -z "$1" || ! -d $1 ]] && { echo 0 ; return; }
-
-    (
-        [[ -f "$1/taskrc.md" ]] && taskrc_md_filter "$1/taskrc.md"
-        [[ -f "$1/taskrc" ]] && cat "$1/taskrc"
-    ) | wc -l
+    cat_taskrc $1 | wc -l
 }
 
 function external_taskrc_call {
@@ -121,7 +122,7 @@ function external_taskrc_call {
     # This allows (for example) invocation of taskrc-defined functions from within an editor or python app, etc.
     # To avoid chaos, there are limitations that matter:
     #   1. $taskrc_dir must be defined in the calling environment, we don't attempt to find it
-    #   2. $taskrc_dir/taskrc must exist
+    #   2. $taskrc_dir/taskrc{.md} must exist
     #
     # To make this work, we create a subshell, source taskrc, verify that a function exists matching $1,
     # and then eval the full command in that subshell.
@@ -208,13 +209,14 @@ function taskrc_v3 {
         load=false
     fi
     if $dump; then
-        [[ -r $taskrc_dir/taskrc ]] || return $(errExit "No current taskrc to dump")
-        cat $taskrc_dir/taskrc
-        echo "[dump OK for $taskrc_dir/taskrc (file is $(taskrc_is_dirty -p) ) ]"  >&2
+        [[ -r $(taskrc_filename $taskrc_dir) ]] || return $(errExit "No current taskrc to dump")
+        cat_taskrc $taskrc_dir
+        echo "[dump OK for $(taskrc_filename $taskrc_dir) (file is $(taskrc_is_dirty -p) ) ]"  >&2
         load=false
     fi
     if $info; then
-        echo "$taskrc_dir/taskrc"
+        #echo "$taskrc_dir/taskrc"
+        echo $(taskrc_filename $taskrc_dir)
         echo "File is $(taskrc_is_dirty -pd)" 2>/dev/null
         load=false
     fi
@@ -227,17 +229,17 @@ function taskrc_v3 {
         edit=true
     fi
     if $edit; then
-        [[ -r $taskrc_dir/taskrc ]] || return $(errExit "No current taskrc to edit")
+        has_taskrc $taskrc_dir || return $(errExit "No current taskrc to edit")
         (
             cd $taskrc_dir || errExit "Can't cd to $taskrc_dir"
-            $EDITOR $taskrc_dir/taskrc
+            $EDITOR $(taskrc_filename $taskrc_dir)
         )
         refresh=true
     fi
     if $refresh; then
-        if [[ ! -r $taskrc_dir/taskrc ]]; then
-            if [[ -r ./taskrc ]]; then
-                read -p "No current taskrc to refresh, but there's a ./taskrc here. Load it? [Y/n]: "
+        if [[ ! -r $(taskrc_filename $taskrc_dir) ]]; then
+            if has_taskrc . ;  then
+                read -p "No current taskrc to refresh, but there's a taskrc here. Load it? [Y/n]: "
                 if [[ $REPLY =~ [yY] ]] || [[ -z $REPLY ]]; then
                     taskrc_v2
                     return
@@ -252,7 +254,6 @@ function taskrc_v3 {
             return $(echo "Quit selected.")
         fi
         if ! taskrc_is_dirty ; then
-
             if ! $force; then
                 return $(errExit "[ no refresh, $taskrc_dir/taskrc is unchanged. -f to force. ]")
             fi
@@ -268,10 +269,8 @@ function taskrc_v3 {
     fi
 
     if $load; then
-
         # Now it's time to establish $taskrc_dir, having dispensed with other options:
         taskrc_dir=$(taskrc_dir_find $PWD $search_up)
-
         #[[ -z $taskrc_dir ]] && return $(errExit "taskrc_dir not resolved")
         if [[ ! -r $(taskrc_filename "$taskrc_dir") ]]; then
             local pp=""

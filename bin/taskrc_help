@@ -2,7 +2,10 @@
 # taskrc_help
 # See taskrc_loader
 
-#set -x
+
+mydir=$(dirname $0)
+[[ -d $mydir ]] || mydir=$PWD
+source ${mydir}/taskrc_loader
 
 function print_builtin_help {
     (
@@ -20,7 +23,7 @@ function print_builtin_help {
         echo "  taskrc.sh [func-name] [...args]: invoke your functions from shell script."
         echo "  #Help:  Use #Help tokens in your taskrc files to customize --help contents."
         echo ""
-    )  
+    )
 }
 
 
@@ -31,25 +34,24 @@ function print_ext_help {
     # rules accordingly.  Otherwise, we'll dump the whole file after stripping common noise.
     #
     local has_helptags=false
-    egrep -q '#Help' ${xp} 2>/dev/null && has_helptags=true
+    xp_text="$(cat $xp)"
+    echo "$xp_test" | egrep -q '#Help' 2>/dev/null && has_helptags=true
 
     if $has_helptags; then
         # We extract all lines marked #Help, plus one line immediately prior to such blocks.  We swap
         # out the #Help tag with a plain hash (#)
         echo "Help (from ${xp}):"
         echo "-----------------"
-        egrep -B 1 '#Help' ${xp} | sed 's/#Help/#/' | sed 's/^/  /'
+        echo "$xp_text" | egrep -B 1 '#Help' | sed 's/#Help/#/' | sed 's/^/  /'
     else
-        egrep -v '^$' ${xp}
-        echo " >> done generic help: [${xp}]"
+        echo "$xp_text" | egrep -v '^$'
     fi
 }
 
 print_builtin_help
 
-if [[ -r ${taskrc_dir}/taskrc ]]; then
-
-    print_ext_help ${taskrc_dir}/taskrc
+if has_taskrc $taskrc_dir; then
+    print_ext_help <(cat_taskrc ${taskrc_dir})
 else
     echo "[There's no active taskrc to print help for.]"
 fi
