@@ -9,7 +9,8 @@
 When tkr loads a taskrc.md file, any code blocks marked ```sh are sourced into the
 current shell.
 
-```sh
+```bash
+# Here's some code from the bash snippet:
 alias hello='echo "Hello world, from $taskrc_dir/taskrc.md"'
 ```
 

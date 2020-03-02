@@ -19,6 +19,7 @@
 declare -x taskrc_dir  # Directory of the most-recently-loaded taskrc file
 declare taskrc_load_time=0 # epoch timestamp (from ctime) for MRL taskrc, used for dirty detection
 
+
 function errExit {
     echo "ERROR: $*" >&2
     exit 1
@@ -68,6 +69,41 @@ function register_taskrc {
     cd - &>/dev/null
 }
 
+function has_taskrc {
+    local xdir=$1
+    [[ -f $xdir/taskrc.md || -f $xdir/taskrc ]]
+}
+
+function taskrc_md_filter {
+    local xo=false;
+    while read line; do
+        #echo "line=[$line]" >/dev/pts/1
+        if $xo; then
+            if [[ "$line" == "\`\`\`" ]]; then
+                xo=false;
+                continue
+            fi
+            echo "$line"
+        else
+            if [[ "$line" == "\`\`\`bash" ]]; then
+                xo=true;
+                continue
+            fi
+        fi
+    done < $1
+}
+
+function source_taskrc {
+    [[ -z "$1" || ! -d $1 ]] && return
+    [[ -f "$1/taskrc.md" ]] && source <(taskrc_md_filter "$1/taskrc.md")
+    [[ -f "$1/taskrc" ]] && source "$1/taskrc"
+}
+
+function taskrc_filename {
+    [[ -f $1/taskrc.md ]] && { echo "$1/taskrc.md"; return ; }
+    echo "$1/taskrc"
+}
+
 function external_taskrc_call {
     # If user calls taskrc [args], and [args] are not recognized, then we
     # try to evaluate them as a possible call on a function defined in the current
@@ -81,9 +117,9 @@ function external_taskrc_call {
     # To make this work, we create a subshell, source taskrc, verify that a function exists matching $1,
     # and then eval the full command in that subshell.
     [[ -z $taskrc_dir ]] && return $(errExit "Unknown arguments(0): $@ [no taskrc_dir]" )
-    [[ -f $taskrc_dir/taskrc ]] || return $(errExit "Unknown arguments(1): $@ [no taskrc]")
+    has_taskrc $taskrc_dir || return $(errExit "Unknown arguments(1): $@ [no taskrc]")
     (
-        source $taskrc_dir/taskrc
+        source_taskrc $taskrc_dir
         # stub echo "inner subshell, args $@" >&2
         funcname=$1
         [[ -z $funcname ]] && errExit "Unknown arguments(2): $@ [taskrc_dir=$taskrc_dir]"
@@ -215,8 +251,8 @@ function taskrc_v3 {
         pushd "$taskrc_dir" >/dev/null
         echo -n "Refreshing $PWD/taskrc: ${BASHPID}["
         register_taskrc "${taskrc_dir}/taskrc"
-        source "${taskrc_dir}/taskrc"
-        taskrc_load_time=$(ctime "${taskrc_dir}/taskrc" )
+        source_taskrc "${taskrc_dir}"
+        taskrc_load_time=$(ctime $(taskrc_filename "$taskrc_dir" ))
         echo "]  OK  @$(date)"
         popd >/dev/null
         load=false
@@ -228,7 +264,7 @@ function taskrc_v3 {
         taskrc_dir=$(taskrc_dir_find $PWD $search_up)
 
         #[[ -z $taskrc_dir ]] && return $(errExit "taskrc_dir not resolved")
-        if [[ ! -r ${taskrc_dir}/taskrc ]]; then
+        if [[ ! -r $(taskrc_filename "$taskrc_dir") ]]; then
             local pp=""
             if $search_up; then
                 pp=" or its parents, sorry."
@@ -244,15 +280,16 @@ function taskrc_v3 {
         fi
         if $load; then
             echo "In [$PWD], loading taskrc into current shell:"
-            source ./taskrc
-            taskrc_load_time=$(ctime taskrc)
-            echo " >> done, $(cat taskrc | wc -l ) lines sourced."
+            source_taskrc .
+            taskrc_load_time=$(ctime $(taskrc_filename .))
+            echo " >> done, $(taskrc_filename .) sourced."
         fi
         popd >/dev/null
     fi
 }
 
-alias taskrc2='taskrc_v2'  # Todo: replace the old taskrc with this sort of alias
+alias taskrc='taskrc_v3'
+alias tkr='taskrc_v3'
 
 
 alias cd_taskrc='cd $taskrc_dir'
