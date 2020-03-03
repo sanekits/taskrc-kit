@@ -47,7 +47,6 @@ function print_ext_help {
 
     for file in $xdir/task{rc.md,rc}; do
         if [[ ! -f $file ]]; then
-            echo "Not found: $file"
             continue
         fi
         # If there's at least one #Help token in the file, we'll assume it's well-marked and follow
