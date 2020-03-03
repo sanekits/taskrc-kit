@@ -214,7 +214,6 @@ function taskrc_v3 {
         load=false
     fi
     if $info; then
-        #echo "$taskrc_dir/taskrc"
         [[ -f ${taskrc_dir}/taskrc.md ]] && ls -l ${taskrc_dir}/taskrc.md
         [[ -f ${taskrc_dir}/taskrc ]] && ls -l ${taskrc_dir}/taskrc
         echo "File is $(taskrc_is_dirty -pd)" 2>/dev/null

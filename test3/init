@@ -1,0 +1,2 @@
+alias rf='source ~/taskrc-kit/bin/taskrc_loader'
+alias vf='vim ~/.task{rc.md,rc}'
