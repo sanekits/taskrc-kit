@@ -58,10 +58,9 @@ function taskrc_is_dirty {
 
 function register_taskrc {
     local dir="$1"
-    for file in taskrc.md taskrc; do
-        [[ -z "$dir" ]] && return
-        [[ -f "$dir/$file" ]] || continue
-        local xpath=$(readlink -f "$dir/$file")
+    for file in ${dir}/task{rc,rc.md}; do
+        [[ -f "$file" ]] || continue
+        local xpath=$(readlink -f "$file")
         local xhash=$(echo "$xpath" | md5sum | cut -d ' ' -f 1)
         [[ -L $HOME/.taskrc_reg/$xhash ]] && continue
         mkdir -p $HOME/.taskrc_reg

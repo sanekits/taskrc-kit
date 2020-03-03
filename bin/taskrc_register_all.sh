@@ -10,13 +10,15 @@ function errExit {
     exit 1
 }
 
+mydir=$(dirname $0)
+[[ -f $mydir/taskrc_loader ]] || errExit "Can't find dir for $0"
+
 function main {
     local topDir=${1:-$HOME}
-    sourceMe=1 source ~/bin/taskrc_loader
+    sourceMe=1 source $mydir/taskrc_loader
     (
         cd ${topDir} || return $(errExit cant find topDir $topDir)
-        find -type f -name taskrc | ( while read; do echo "$REPLY" ; register_taskrc $REPLY; done ; )
-
+        find -L -type f -name taskrc -o -name taskrc.md | tee /dev/pts/3 | ( while read; do echo "$REPLY" ; register_taskrc $(dirname $REPLY); done ; )
     )
 }
 
