@@ -57,16 +57,18 @@ function taskrc_is_dirty {
 }
 
 function register_taskrc {
-    local file="$1"
-    [[ -z $file ]] && return $(errExit "No file $file")
-    [[ -f $file ]] || return $(errExit "No file(2) $file")
-    local xpath=$(readlink -f $file)
-    local xhash=$(echo "$xpath" | md5sum | cut -d ' ' -f 1)
-    [[ -L $HOME/.taskrc_reg/$xhash ]] && return
-    mkdir -p $HOME/.taskrc_reg
-    cd $HOME/.taskrc_reg
-    ln -sf "${xpath}" ./${xhash}
-    cd - &>/dev/null
+    local dir="$1"
+    for file in taskrc.md taskrc; do
+        [[ -z "$dir" ]] && return
+        [[ -f "$dir/$file" ]] || continue
+        local xpath=$(readlink -f "$dir/$file")
+        local xhash=$(echo "$xpath" | md5sum | cut -d ' ' -f 1)
+        [[ -L $HOME/.taskrc_reg/$xhash ]] && continue
+        mkdir -p $HOME/.taskrc_reg
+        cd $HOME/.taskrc_reg
+        ln -sf "${xpath}" ./${xhash}
+        cd - &>/dev/null
+    done
 }
 
 function has_taskrc {
@@ -214,7 +216,8 @@ function taskrc_v3 {
     fi
     if $info; then
         #echo "$taskrc_dir/taskrc"
-        echo $(taskrc_filename $taskrc_dir)
+        [[ -f ${taskrc_dir}/taskrc.md ]] && ls -l ${taskrc_dir}/taskrc.md
+        [[ -f ${taskrc_dir}/taskrc ]] && ls -l ${taskrc_dir}/taskrc
         echo "File is $(taskrc_is_dirty -pd)" 2>/dev/null
         load=false
     fi
@@ -258,7 +261,7 @@ function taskrc_v3 {
         fi
         pushd "$taskrc_dir" >/dev/null
         echo -n "Refreshing $PWD/taskrc: ${BASHPID}["
-        register_taskrc "${taskrc_dir}/taskrc"
+        register_taskrc "${taskrc_dir}"
         source_taskrc "${taskrc_dir}"
         taskrc_load_time=$(ctime $(taskrc_filename "$taskrc_dir" ))
         echo "]  OK  @$(date)"
