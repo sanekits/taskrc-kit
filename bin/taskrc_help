@@ -7,51 +7,73 @@ mydir=$(dirname $0)
 [[ -d $mydir ]] || mydir=$PWD
 source ${mydir}/taskrc_loader
 
-function print_builtin_help {
-    (
-        echo "Built-in options:"
-        echo "  -s, --search-up:  find taskrc by searching parent dir chain"
-        echo "  -r, --refresh:    reload most recent taskrc"
-        echo "  -d, --dump:       dump most recent taskrc"
-        echo "  -i, --info:       print path of most recent taskrc"
-        echo "  -n, --new:        create new taskrc in current dir"
-        echo "  -e, --edit:       edit, then reload current taskrc"
-        echo ""
-        echo "Other built-ins:"
-        echo "  cd_t{askrc}:  cd to most recent taskrc dir"
-        echo "  \$taskrc_dir: directory of most recent taskrc"
-        echo "  taskrc.sh [func-name] [...args]: invoke your functions from shell script."
-        echo "  #Help:  Use #Help tokens in your taskrc files to customize --help contents."
-        echo ""
-    )
+xstub_cnt=0
+function xstub {
+    (( xstub_cnt++ ))
+    echo "xstub[$xstub_cnt: $@]" >&2
+}
+
+function print_green {
+    echo -en "\E[32m"
+}
+
+function print_plain {
+    echo -en "\E[0m"
 }
 
 
+function print_builtin_help {
+    cat << EOF
+$(print_green) Built-in options:
+--------------------------------------------
+$(print_plain)    -s, --search-up:  find taskrc by searching parent dir chain
+    -r, --refresh:    reload most recent taskrc
+    -d, --dump:       dump most recent taskrc
+    -i, --info:       print path of most recent taskrc
+    -n, --new:        create new taskrc in current dir
+    -e, --edit:       edit, then reload current taskrc
+
+$(print_green) Other built-ins:
+--------------------------------------------
+$(print_plain)    cd_t{askrc}:  cd to most recent taskrc dir
+    \$taskrc_dir: directory of most recent taskrc
+    taskrc.sh [func-name] [...args]: invoke your functions from shell script.
+    #Help:  Use #Help tokens in your taskrc files to customize --help contents.
+EOF
+}
+
 function print_ext_help {
-    local xp="$1" # path to the taskrc file
+    local xdir="$1"
 
-    # If there's at least one #Help token in the file, we'll assume it's well-marked and follow
-    # rules accordingly.  Otherwise, we'll dump the whole file after stripping common noise.
-    #
-    local has_helptags=false
-    xp_text="$(cat $xp)"
-    echo "$xp_test" | egrep -q '#Help' 2>/dev/null && has_helptags=true
+    for file in $xdir/task{rc.md,rc}; do
+        if [[ ! -f $file ]]; then
+            continue
+        fi
+        # If there's at least one #Help token in the file, we'll assume it's well-marked and follow
+        # rules accordingly.  Otherwise, we'll dump the whole file after stripping common noise.
+        local has_helptags=false
+        <$file egrep -q '#Help' 2>/dev/null && has_helptags=true
 
-    if $has_helptags; then
-        # We extract all lines marked #Help, plus one line immediately prior to such blocks.  We swap
-        # out the #Help tag with a plain hash (#)
-        echo "Help (from ${xp}):"
-        echo "-----------------"
-        echo "$xp_text" | egrep -B 1 '#Help' | sed 's/#Help/#/' | sed 's/^/  /'
-    else
-        echo "$xp_text" | egrep -v '^$'
-    fi
+        echo ""
+        echo "$(print_green) Help from $file:"
+        echo "---------------------------------------------------$(print_plain)"
+        (
+            if $has_helptags; then
+                # We extract all lines marked #Help, plus one line immediately prior to such blocks.  We swap
+                # out the #Help tag with a plain hash (#)
+                <$file egrep -B 1 '#Help' | sed 's/#Help/#/'
+            else
+                # There's no #Help tags in the file, so just strip blank lines:
+                <$file egrep -v '^$'
+            fi
+        ) | sed 's/^/    /'
+    done
 }
 
 print_builtin_help
 
 if has_taskrc $taskrc_dir; then
-    print_ext_help <(cat_taskrc ${taskrc_dir})
+    print_ext_help $taskrc_dir
 else
     echo "[There's no active taskrc to print help for.]"
 fi
