@@ -100,6 +100,11 @@ function cat_taskrc {
     [[ -f "$1/taskrc" ]] && cat "$1/taskrc"
 }
 function source_taskrc {
+    if [[ $UID == 0 ]]; then
+        echo "ERROR: You can't safely source taskrc as root (UID==$UID). Hit Ctrl+C now or die." >&2
+        read -p ""
+        exit 1
+    fi
     # When "including" a taskrc within another, this is the
     # idiom:
     #   source_taskrc ../
