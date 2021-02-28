@@ -48,7 +48,7 @@ function print_recurse_help {
     local orig="$1"
     local go=true
     for inner_file in $(grep -E '^source .*$' "$orig" 2>/dev/null | awk '{print $2}'); do
-        print_ext_help -x "$inner_file"
+        print_ext_help -x "$(eval echo $inner_file)"
     done
 }
 

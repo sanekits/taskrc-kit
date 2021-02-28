@@ -13,5 +13,5 @@ source ../taskrc_proj1
 alias do_nothing='echo nothing'
 #Help
 
-source inner/taskrc_inner
+source $taskrc_dir/inner/taskrc_inner
 
