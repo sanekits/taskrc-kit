@@ -1,0 +1,6 @@
+# taskrc_proj1
+
+function print_proj1 {
+    #Help
+    echo "this is taskrc_proj1, taskrc_dir=$taskrc_dir"
+}

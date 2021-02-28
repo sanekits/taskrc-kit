@@ -42,31 +42,52 @@ $(print_plain)    cd_t{askrc}:  cd to most recent taskrc dir
 EOF
 }
 
-function print_ext_help {
-    local xdir="$1"
 
-    for file in $xdir/task{rc.md,rc}; do
+function print_recurse_help {
+    # Search for 'source' commands in file $1 and invoke print_ext_help for each
+    local orig="$1"
+    local go=true
+    for inner_file in $(grep -E '^source .*$' "$orig" 2>/dev/null | awk '{print $2}'); do
+        print_ext_help -x "$inner_file"
+    done
+}
+
+function print_ext_help {
+    local parent_file_list
+    local file
+    if [[ $1 == -x ]]; then
+        # Use explicit file as parent:
+        parent_file_list="$2"
+    else
+        local xdir="$1"
+        parent_file_list="$(ls $xdir/task{rc.md,rc} 2>/dev/null)"
+    fi
+
+    for file in $parent_file_list; do
         if [[ ! -f $file ]]; then
             continue
         fi
+
+        print_recurse_help "${file}"
+
         # If there's at least one #Help token in the file, we'll assume it's well-marked and follow
         # rules accordingly.  Otherwise, we'll dump the whole file after stripping common noise.
         local has_helptags=false
         <$file egrep -q '#Help' 2>/dev/null && has_helptags=true
 
         echo ""
-        echo "$(print_green) Help from $file:"
+        echo "$(print_green) Help from $(readlink -f $file):"
         echo "---------------------------------------------------$(print_plain)"
         (
             if $has_helptags; then
                 # We extract all lines marked #Help, plus one line immediately prior to such blocks.  We swap
                 # out the #Help tag with a plain hash (#)
-                <$file egrep -B 1 '#Help' | sed 's/#Help/#/'
+                <$file egrep -B 1 '#Help' | sed 's/#Help//'
             else
                 # There's no #Help tags in the file, so just strip blank lines:
                 <$file egrep -v '^$'
             fi
-        ) | sed 's/^/    /'
+        ) | sed -e 's/^/    /'
     done
 }
 
