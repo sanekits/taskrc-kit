@@ -212,7 +212,7 @@ function taskrc_v3 {
         shift
     done
     if $help; then
-        taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' | less -Xr
+        taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' | less -FXr
         load=false
     fi
     if $dump; then
