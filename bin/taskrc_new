@@ -9,7 +9,7 @@ function plain_new {
 # taskrc for $(basename $PWD)
 # vim: filetype=sh :
 
-# If someone does a raw "source taskrc", we ensure that $taskrc_dir gets defined anyway
+# If someone does a raw "source taskrc", we ensure that \$taskrc_dir gets defined anyway
 [[ -z \$taskrc_dir && -f taskrc ]] && export taskrc_dir=\$PWD
 
 # Use taskrc -h for help on built-in taskrc functions.
