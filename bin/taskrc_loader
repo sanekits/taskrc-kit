@@ -189,6 +189,10 @@ function taskrc_v3 {
             -r|--refresh)
                 refresh=true
                 ;;
+            -rh|-hr)
+                refresh=true
+                help=true
+                ;;
             -f|--force)
                 force=true
                 ;;
@@ -211,10 +215,6 @@ function taskrc_v3 {
         esac
         shift
     done
-    if $help; then
-        taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' | less -FXr
-        load=false
-    fi
     if $dump; then
         [[ -r $(taskrc_filename $taskrc_dir) ]] || return $(errExit "No current taskrc to dump")
         cat_taskrc $taskrc_dir
@@ -290,7 +290,7 @@ function taskrc_v3 {
         fi
         pushd ${taskrc_dir} &>/dev/null || return $(errExit "Can't cd to ${taskrc_dir}")
         if $help; then
-            egrep -v '^$' ./taskrc
+            egrep -v '^$' ./taskrc 2>/dev/null
             echo " >> done help: [${taskrc_dir}/taskrc]"
         fi
         if $load; then
@@ -300,6 +300,10 @@ function taskrc_v3 {
             echo " >> done, $(taskrc_linecount .) lines sourced."
         fi
         popd >/dev/null
+    fi
+    if $help; then
+        taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' 2>/dev/null | less -FXr
+        load=false
     fi
 }
 
