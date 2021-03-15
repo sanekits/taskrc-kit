@@ -29,6 +29,16 @@ function ctime {
     date +%s
 }
 
+# Stub debug-aid: paste and uncomment this line to invoke repl() where needed.
+# while read -ep "Stub 102:" stub; do repl "$stub" || break; done
+repl() {
+    local eval_txt="$1"
+    [[ -z $eval_txt ]] && { false; return; }
+    eval "$eval_txt"
+    res=$?
+    echo "Command returned $res" >&2
+}
+
 function taskrc_is_dirty {
     local print=false
     local detail=false
@@ -137,7 +147,6 @@ function external_taskrc_call {
     has_taskrc $taskrc_dir || return $(errExit "Unknown arguments(1): $@ [no taskrc]")
     (
         source_taskrc $taskrc_dir
-        # stub echo "inner subshell, args $@" >&2
         funcname=$1
         [[ -z $funcname ]] && errExit "Unknown arguments(2): $@ [taskrc_dir=$taskrc_dir]"
         [[ $(type -t $funcname) == function ]] || errExit "$funcname is not a function"
@@ -179,6 +188,7 @@ function taskrc_v3 {
         case $1 in
             -h|--help)
                 help=true
+                load=false
                 ;;
             -s|--search-up)
                 search_up=true
@@ -192,6 +202,7 @@ function taskrc_v3 {
             -rh|-hr)
                 refresh=true
                 help=true
+                load=false
                 ;;
             -f|--force)
                 force=true
