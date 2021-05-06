@@ -220,8 +220,14 @@ function taskrc_v3 {
                 new=true
                 ;;
             *)
-                external_taskrc_call $@
-                return
+                set -x
+                if ! $help; then
+                    external_taskrc_call $@
+                    return
+                else
+                    # When extra args follow -h, they're treated as a search pattern
+                    # so we should pass them along
+                continue
                 ;;
         esac
         shift
@@ -313,6 +319,7 @@ function taskrc_v3 {
         popd >/dev/null
     fi
     if $help; then
+        echo "during help, args=$@" >&2
         taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' 2>/dev/null | less -FXRm
         load=false
     fi
