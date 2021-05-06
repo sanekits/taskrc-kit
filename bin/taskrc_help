@@ -32,6 +32,7 @@ $(print_plain)    -s, --search-up:  find taskrc by searching parent dir chain
     -i, --info:       print path of most recent taskrc
     -n, --new:        create new taskrc in current dir
     -e, --edit:       edit, then reload current taskrc
+    -h, --help <pattern>: view help with optional filter
 
 $(print_green) Other built-ins:
 --------------------------------------------

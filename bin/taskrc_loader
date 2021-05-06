@@ -184,6 +184,7 @@ function taskrc_v3 {
     local force=false       # -f, --force: do the thing anyway
     local new=false        # -n, --new: create a new taskrc here .
     local edit=false       # -e, --edit: edit current taskrc, then reload
+    local inner_args       # Anything left over could be passed down
     while [[ ! -z $1 ]]; do
         case $1 in
             -h|--help)
@@ -220,14 +221,13 @@ function taskrc_v3 {
                 new=true
                 ;;
             *)
-                set -x
                 if ! $help; then
                     external_taskrc_call $@
                     return
-                else
-                    # When extra args follow -h, they're treated as a search pattern
-                    # so we should pass them along
-                continue
+                fi
+                # When extra args follow -h, they're treated as a search pattern
+                # so we should pass them along
+                inner_args="${inner_args} $1"
                 ;;
         esac
         shift
@@ -319,8 +319,9 @@ function taskrc_v3 {
         popd >/dev/null
     fi
     if $help; then
-        echo "during help, args=$@" >&2
-        taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' 2>/dev/null | less -FXRm
+        local user_search_pattern=".*"
+        [[ -n $inner_args ]] && user_search_pattern=$inner_args
+        taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' 2>/dev/null | grep -E "$user_search_pattern" | less -FXRm
         load=false
     fi
 }
