@@ -61,6 +61,10 @@ EOF2
 
 if [[ -z $sourceMe ]]; then
     cd ${taskrc_dir} || errExit "Can't cd to $taskrc_dir"
+    if [[ $1 == "--cat" ]]; then
+        plain_new
+        exit 0
+    fi
     read -n 1 -p  "Create new taskrc: [p]lain or [m]arkdown notebook?: "
     case $REPLY in
         [pP])

@@ -184,6 +184,7 @@ function taskrc_v3 {
     local force=false       # -f, --force: do the thing anyway
     local new=false        # -n, --new: create a new taskrc here .
     local edit=false       # -e, --edit: edit current taskrc, then reload
+    local catt=false       # -c, --cat:  cat to stdout the latest new-file template
     local inner_args       # Anything left over could be passed down
     while [[ ! -z $1 ]]; do
         case $1 in
@@ -220,6 +221,9 @@ function taskrc_v3 {
             -n|--new)
                 new=true
                 ;;
+            -c|--cat)
+                catt=true
+                ;;
             *)
                 if ! $help; then
                     external_taskrc_call $@
@@ -232,6 +236,10 @@ function taskrc_v3 {
         esac
         shift
     done
+    if $catt; then
+        taskrc_dir=$PWD taskrc_new --cat
+        load=false
+    fi
     if $dump; then
         [[ -r $(taskrc_filename $taskrc_dir) ]] || return $(errExit "No current taskrc to dump")
         cat_taskrc $taskrc_dir
