@@ -12,16 +12,7 @@ function plain_new {
 # If someone does a raw "source taskrc", we ensure that \$taskrc_dir gets defined anyway
 [[ -z \$taskrc_dir && -f taskrc ]] && export taskrc_dir=\$PWD
 
-function use_local_histfile {
-    #Help use_local_histfile <true*|false>: sets HISTFILE to be local to taskrc_dir (false to disable)
-    if [[ -z \$1 ]] || [[ \$1 == true ]]; then
-        HISTFILE=\$taskrc_dir/.bash_history
-        history -r
-    else
-        HISTFILE=\$HOME/.bash_history
-        history -r
-    fi
-}
+type -t localhist_set >/dev/null && { localhist_set /c/Projects/taskrc-kit/bash_history;  echo "HISTFILE is \$HISTFILE"; }
 
 # Use taskrc -h for help on built-in taskrc functions.
 # To provide help for definitions in this file, add #Help tags, e.g.:
