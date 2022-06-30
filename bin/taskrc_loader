@@ -5,7 +5,7 @@
 # a scriptable thing.
 #
 #
-#   taskrc is a shell helper for directory-specific 'taskrc' files.  A taskrc file is "your favoritee shell definitions
+#   taskrc is a shell helper for directory-specific 'taskrc' files.  A taskrc file is "your favorite shell definitions
 # that are focused on a particular project or task".
 #
 # Often the taskrc file is saved with a project source code base.

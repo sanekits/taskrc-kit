@@ -1,0 +1,12 @@
+version: "3.4"
+services:
+   taskrc-kit:
+      build:
+         context: .
+         args:
+             VARIANT: bullseye
+      volumes:
+        - ${HOME}:/host_home
+        - ${HOME}/.ssh:/home/vscode/.ssh
+        - ..:/workspace
+      command:  sleep infinity
