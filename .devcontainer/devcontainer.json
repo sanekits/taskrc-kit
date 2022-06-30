@@ -12,6 +12,7 @@
     "dockerComposeFile": "docker-compose.yaml",
     "service": "taskrc-kit",
     "workspaceFolder": "/workspace",
+    "postStartCommand": "/workspace/.devcontainer/bin/postStartCommand.sh",
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],

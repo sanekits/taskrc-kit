@@ -34,3 +34,39 @@ cd /mnt/c/Users/lesma/AppData/Local/Packages/Microsoft.4297127D64EC6_8wekyb3d8bb
 cd /home/lmatheson/projects/webstuff.explore/chesster #
 #1647106034
 show_links  # minecraft links
+#1656554361
+lr
+#1656554363
+cd .devcontainer/
+#1656554363
+lr
+#1656554367
+cd bin
+#1656554367
+lr
+#1656554371
+chmod +x postStartCommand.sh 
+#1656554552
+cd
+#1656554553
+ls -al
+#1656554558
+cd my-home/
+#1656554559
+gs
+#1656554563
+.1
+#1656554566
+ll .gitconfig 
+#1656554569
+cat .gitconfig 
+#1656554575
+cd my-home/
+#1656554576
+gs
+#1656554591
+ls gitconfig
+#1656554600
+ls -al | grep gitco
+#1656554609
+cat gitconfig

@@ -6,7 +6,7 @@ services:
          args:
              VARIANT: bullseye
       volumes:
-        - ${HOME}:/host_home
-        - ${HOME}/.ssh:/home/vscode/.ssh
+        - ${HOME}:/host_home:ro
+        - ${HOME}/.ssh:/home/vscode/.ssh:ro
         - ..:/workspace
       command:  sleep infinity
