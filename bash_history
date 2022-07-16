@@ -34,3 +34,13 @@ cd /mnt/c/Users/lesma/AppData/Local/Packages/Microsoft.4297127D64EC6_8wekyb3d8bb
 cd /home/lmatheson/projects/webstuff.explore/chesster #
 #1647106034
 show_links  # minecraft links
+#1657976136
+gpa
+#1657976139
+git pull
+#1657976142
+gs
+#1657976145
+ga .
+#1657976145
+gs
