@@ -1,20 +1,16 @@
-# taskrc_loader
+# taskrc_loader v4
 # vim: filetype=sh :
+#  https://github.com/sanekits/taskrc-kit
 #
 #  This should be sourced in the shell, it has no value as an external command.  Run 'taskrc.sh' if you want
 # a scriptable thing.
-#
 #
 #   taskrc is a shell helper for directory-specific 'taskrc' files.  A taskrc file is "your favorite shell definitions
 # that are focused on a particular project or task".
 #
 # Often the taskrc file is saved with a project source code base.
 #
-# TODO:
-#     Add -x options to maintain index of all taskrc's
 #
-
-#set -x
 
 declare -x taskrc_dir  # Directory of the most-recently-loaded taskrc file
 declare taskrc_load_time=0 # epoch timestamp (from ctime) for MRL taskrc, used for dirty detection
@@ -174,7 +170,7 @@ function taskrc_dir_find {
     false
 }
 
-function taskrc_v3 {
+function taskrc_v4 {
     local help=false       # -h, --help : print help for this function, then help for most recent taskrc
     local search_up=false  # -s, --search-up : find taskrc by searching parent dirs of .
     local refresh=false    # -r, --refresh : reload most recent taskrc (i.e. to pick up changes)
@@ -273,13 +269,13 @@ function taskrc_v3 {
             if has_taskrc . ;  then
                 read -p "No current taskrc to refresh, but there's a taskrc here. Load it? [Y/n]: "
                 if [[ $REPLY =~ [yY] ]] || [[ -z $REPLY ]]; then
-                    taskrc_v3
+                    taskrc_v4
                     return
                 fi
             else
                 read -p "No current taskrc or ./taskrc. Search parent dirs instead? [Y/n]: "
                 if [[ $REPLY =~ [yY] ]] || [[ -z $REPLY ]]; then
-                    taskrc_v3 -s
+                    taskrc_v4 -s
                     return
                 fi
             fi
@@ -334,8 +330,8 @@ function taskrc_v3 {
     fi
 }
 
-alias taskrc='taskrc_v3'
-alias tkr='taskrc_v3'
+alias taskrc='taskrc_v4'
+alias tkr='taskrc_v4'
 
 
 alias cd_taskrc='cd $taskrc_dir'
