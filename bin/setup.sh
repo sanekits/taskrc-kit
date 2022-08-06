@@ -45,6 +45,7 @@ path_fixup() {
 shrc_fixup() {
     # We must ensure that .bashrc sources our settings script and that the
     # loader symlink is present
+    set -x
     (
         source ~/.bashrc
         [[ -n TASKRCKIT_LOADER ]] && exit 0
