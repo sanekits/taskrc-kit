@@ -2,7 +2,7 @@
 
 # Running taskrc-kit-version.sh is the correct way to
 # get the home path for taskrc-kit and its tools.
-TaskrckitVersion=0.8.0
+TaskrckitVersion=0.8.1
 
 set -e
 

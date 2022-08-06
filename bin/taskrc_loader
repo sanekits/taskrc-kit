@@ -12,6 +12,7 @@
 #
 #
 
+TASKRCKIT_LOADER=1  # detection semaphore for setup.sh
 declare -x taskrc_dir  # Directory of the most-recently-loaded taskrc file
 declare taskrc_load_time=0 # epoch timestamp (from ctime) for MRL taskrc, used for dirty detection
 

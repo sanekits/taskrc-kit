@@ -1,4 +1,4 @@
 # taskrc-kit
 
 ## Setup
-https://github.com/sanekits/taskrc-kit/releases
+https://github.com/sanekits/taskrc-kit/releases/latest
