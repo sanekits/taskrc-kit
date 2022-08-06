@@ -1,7 +1,7 @@
 version: "3.4"
 services:
    taskrc-kit:
-      image: taskrc-kit-base
+      build: .
       volumes:
         - ${HOME}:/host_home:ro
         - ..:/workspace
