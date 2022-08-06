@@ -11,9 +11,11 @@ die() {
 
 if [[ -z $sourceMe ]]; then
     builtin cd ${Scriptdir}/../bin || die 100
-    if [[ $( command git status -s . | command wc -l 2>/dev/null) -gt 0 ]]; then
-        die "One or more files in $PWD need to be committed before publish"
-    fi
+    [[ -n ${LOCALPUBLISH} ]] || {
+        if [[ $( command git status -s . | command wc -l 2>/dev/null) -gt 0 ]]; then
+            die "One or more files in $PWD need to be committed before publish"
+        fi
+    }
     command git rev-parse HEAD > ./hashfile || die 104
     builtin cd ${Scriptdir}/.. || die 101
     version=$( bin/taskrc-kit-version.sh | cut -f2)
