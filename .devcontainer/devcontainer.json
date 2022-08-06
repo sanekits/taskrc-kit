@@ -32,8 +32,8 @@
 	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker.
 	//"mounts": [ "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" ],
 	"mounts": [
-        "source=${localEnv:HOME},target=/host_home,type=bind,readonly"
-        //"source=../,target=/workspace,type=bind"
+        "source=${localEnv:HOME},target=/host_home,type=bind,readonly",
+        "source=/mnt/c/Users/lesma/Downloads,target=/downloads,type=bind"
     ],
 
 	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
