@@ -16,6 +16,10 @@ inode() {
     ( command ls -i "$1" | command awk '{print $1}') 2>/dev/null
 }
 
+stub() {
+    echo "> > STUB: [%*] < < " >&2
+}
+
 is_on_path() {
     local tgt_dir="$1"
     [[ -z $tgt_dir ]] && { true; return; }
@@ -47,6 +51,7 @@ shrc_fixup() {
     # loader symlink is present
     (
         source ${HOME}/.bashrc
+        stub "TASKRCKIT_LOADER=$TASKRCKIT_LOADER"
         [[ ${TASKRCKIT_LOADER} == 1 ]] && {
             echo "Shell init already sources taskrc-kit loader"
             exit 0
