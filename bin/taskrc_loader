@@ -170,8 +170,10 @@ function taskrc_dir_find {
     false
 }
 
+# The 'v4' in this function name refers only to the function, not the entire taskrc-kit:
 function taskrc_v4 {
     local help=false       # -h, --help : print help for this function, then help for most recent taskrc
+    local version=false    # -v, --version: print taskrc-kit version number
     local search_up=false  # -s, --search-up : find taskrc by searching parent dirs of .
     local refresh=false    # -r, --refresh : reload most recent taskrc (i.e. to pick up changes)
     local dump=false       # -d, --dump: print contents of most recent taskrc to stdout
@@ -187,6 +189,10 @@ function taskrc_v4 {
             -h|--help)
                 help=true
                 load=false
+                ;;
+            -v|--version)
+                taskrc-kit-version.sh
+                return
                 ;;
             -s|--search-up)
                 search_up=true
