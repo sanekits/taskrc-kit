@@ -45,13 +45,15 @@ path_fixup() {
 shrc_fixup() {
     # We must ensure that .bashrc sources our settings script and that the
     # loader symlink is present
-    set -x
     (
         source ${HOME}/.bashrc
-        set -x
-        [[ -n $TASKRCKIT_LOADER ]] && exit 0
+        [[ ${TASKRCKIT_LOADER} == 1 ]] && {
+            echo "Shell init already sources taskrc-kit loader"
+            exit 0
+        }
     ) && return
     echo '[[ -n $PS1 && -e ${HOME}/.taskrc-kit-loader ]] && source ${HOME}/.taskrc-kit-loader # Added by taskrc-kit setup.sh' >> ${HOME}/.bashrc
+    echo "Added taskrc-kit loader to shell init"
     reload_reqd=true
 }
 
