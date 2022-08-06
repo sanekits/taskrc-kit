@@ -56,6 +56,7 @@ shrc_fixup() {
 
 main() {
     reload_reqd=false
+    echo "taskrc-kit setup args[$*]"
     if [[ ! -d $HOME/.local/bin/taskrc-kit ]]; then
         if [[ -e $HOME/.local/bin/taskrc-kit ]]; then
             die "$HOME/.local/bin/taskrc-kit exists but is not a directory.  Refusing to overwrite"
