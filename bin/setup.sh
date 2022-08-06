@@ -48,7 +48,7 @@ shrc_fixup() {
     set -x
     (
         source ~/.bashrc
-        [[ -n TASKRCKIT_LOADER ]] && exit 0
+        [[ -n $TASKRCKIT_LOADER ]] && exit 0
     ) && return
     echo '[[ -n $PS1 && -e ${HOME}/.taskrc-kit-loader ]] && source ${HOME}/.taskrc-kit-loader # Added by taskrc-kit setup.sh' >> ${HOME}/.bashrc
     reload_reqd=true
