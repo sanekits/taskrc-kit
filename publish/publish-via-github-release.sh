@@ -21,7 +21,7 @@ if [[ -z $sourceMe ]]; then
 
     command mkdir -p ./tmp
 
-    destFile=$PWD/tmp/taskrckit-setup-${version}.sh
+    destFile=$PWD/tmp/taskrc-kit-setup-${version}.sh
     command makeself.sh --base64 $PWD/bin $destFile "taskrc-kit ${version}" ./setup.sh  || die # [src-dir] [dest-file] [label] [setup-command]
     (
         cd $(dirname $destFile) && ln -sf $(basename $destFile) latest.sh

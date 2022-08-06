@@ -3,7 +3,7 @@
 # See taskrc_loader
 
 
-mydir=$(dirname $0)
+mydir=$(dirname $(readlink -f $0))
 [[ -d $mydir ]] || mydir=$PWD
 source ${mydir}/taskrc_loader
 

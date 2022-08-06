@@ -71,6 +71,9 @@ main() {
     command cp -r ${Scriptdir}/* ./ || die "failed copying from ${Scriptdir} to $PWD"
     builtin cd .. # Now we're in .local/bin
     command ln -sf ./taskrc-kit/taskrc-kit-version.sh ./
+    for cmdx in taskrc_register_all.sh taskrc.sh taskrc_help taskrc_new; do
+        command ln -sf ./taskrc-kit/${cmdx} ./
+    done
     path_fixup "$PWD" || die "102"
     shrc_fixup || die "104"
     $reload_reqd && builtin echo "Shell reload required ('bash -l')" >&2
