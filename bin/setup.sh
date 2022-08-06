@@ -17,7 +17,7 @@ inode() {
 }
 
 stub() {
-    echo "> > STUB: [%*] < < " >&2
+    echo "> > STUB: [$*] < < " >&2
 }
 
 is_on_path() {
