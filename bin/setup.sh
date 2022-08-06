@@ -47,7 +47,8 @@ shrc_fixup() {
     # loader symlink is present
     set -x
     (
-        source ~/.bashrc
+        source ${HOME}/.bashrc
+        set -x
         [[ -n $TASKRCKIT_LOADER ]] && exit 0
     ) && return
     echo '[[ -n $PS1 && -e ${HOME}/.taskrc-kit-loader ]] && source ${HOME}/.taskrc-kit-loader # Added by taskrc-kit setup.sh' >> ${HOME}/.bashrc
