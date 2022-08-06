@@ -1,19 +1,25 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.234.0/containers/debian
 {
-	"name": "Debian",
+	"name": "taskrc-kit container",
 	"build": {
 		"dockerfile": "Dockerfile",
 		// Update 'VARIANT' to pick an Debian version: bullseye, buster
 		// Use bullseye on local arm64/Apple Silicon.
 		"args": { "VARIANT": "bullseye" }
 	},
+    "workspaceFolder": "/workspace",
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": {},
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [],
+
+    "containerEnv": {
+        //"RCD_FLAGS":"none"
+        //"RCD_FLAGS":"protectBashrc"
+    },
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
