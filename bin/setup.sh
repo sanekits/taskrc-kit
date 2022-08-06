@@ -53,6 +53,7 @@ shrc_fixup() {
         echo "Shell init already sources taskrc-kit loader"
         return
     }
+    ln -sf ${HOME}/.local/bin/taskrc-kit/taskrc_loader ${HOME}/.taskrc-kit-loader
     echo '[[ -n $PS1 && -e ${HOME}/.taskrc-kit-loader ]] && source ${HOME}/.taskrc-kit-loader # Added by taskrc-kit setup.sh' >> ${HOME}/.bashrc
     echo "Added taskrc-kit loader to shell init"
     reload_reqd=true
