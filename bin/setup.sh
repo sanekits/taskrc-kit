@@ -84,6 +84,7 @@ main() {
     path_fixup "$PWD" || die "102"
     shrc_fixup || die "104"
     $reload_reqd && builtin echo "Shell reload required ('bash -l')" >&2
+    true
 }
 
 [[ -z $sourceMe ]] && main "$@"
