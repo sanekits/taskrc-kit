@@ -11,5 +11,5 @@ Scriptdir=$(dirname -- "$Script")
 
 
 if [ -z "$sourceMe" ]; then
-    printf "%s\t%s" ${Scriptdir}/taskrc_loader ${TaskrckitVersion}
+    printf "%s\t%s" ${Scriptdir} ${TaskrckitVersion}
 fi
