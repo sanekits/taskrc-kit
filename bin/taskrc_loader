@@ -339,6 +339,8 @@ function taskrc_v4 {
 
 alias taskrc='taskrc_v4'
 alias tkr='taskrc_v4'
+alias mk='make'
+complete -F _complete_alias mk
 
 
 alias cd_taskrc='cd $taskrc_dir'
