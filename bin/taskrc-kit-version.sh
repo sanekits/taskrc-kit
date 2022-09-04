@@ -2,7 +2,7 @@
 
 # Running taskrc-kit-version.sh is the correct way to
 # get the home install path for the tool
-KitVersion=0.1.0
+KitVersion=1.0.0
 
 canonpath() {
     builtin type -t realpath.sh &>/dev/null && {
