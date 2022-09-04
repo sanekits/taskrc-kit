@@ -1,7 +1,7 @@
 # List of paths in .local/bin/taskrc-kit/ which get symlinked to
 # .local/bin on setup
 #
-# TODO: list your scripts which need to be on the PATH, one per line
+# List your scripts which need to be on the PATH, one per line
 #
 #   -  e.g.:
 #   foo-script.sh #help Prints 'foo' on demand
