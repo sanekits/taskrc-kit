@@ -21,6 +21,7 @@ canonpath() {
 stub() {
    builtin echo "  <<< STUB[$*] >>> " >&2
 }
+
 scriptName="$(canonpath  $0)"
 scriptDir=$(command dirname -- "${scriptName}")
 
@@ -31,7 +32,17 @@ die() {
     builtin exit 1
 }
 
+remove_pre_shellkit_content() {
+    for name in $HOME/.taskrc-kit-loader $HOME/.local/bin/taskrc* ; do
+        [[ -e "$name" ]] && {
+            builtin echo "Removing obsolete: $name" >&2
+            command rm -rf "${name}" || die "Failed removing ${name}"
+        };
+    done
+}
+
 main() {
+    remove_pre_shellkit_content
     Script=${scriptName} main_base "$@"
     builtin cd ${HOME}/.local/bin || die 208
     # TODO: kit-specific steps can be added here

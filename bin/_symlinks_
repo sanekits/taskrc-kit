@@ -10,4 +10,7 @@
 #   - (${SHELLKIT_HELP_SYMBOL} expands to the script name to avoid repetition.)
 #   my-script.sh #help@ ${SHELLKIT_HELP_SYMBOL} --help
 #
-taskrc-kit.sh
+taskrc.sh
+taskrc_register_all.sh
+taskrc_new
+taskrc_help

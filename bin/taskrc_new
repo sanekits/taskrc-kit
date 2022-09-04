@@ -12,7 +12,7 @@ function plain_new {
 # If someone does a raw "source taskrc", we ensure that \$taskrc_dir gets defined anyway
 [[ -z \$taskrc_dir && -f taskrc ]] && export taskrc_dir=\$PWD
 
-type -t localhist_set >/dev/null && { localhist_set \${taskrc_dir}/bash_history;  echo "HISTFILE is \$HISTFILE"; }
+#type -t localhist_set >/dev/null && { localhist_set \${taskrc_dir}/bash_history;  echo "HISTFILE is \$HISTFILE"; }
 
 # Use taskrc -h for help on built-in taskrc functions.
 # To provide help for definitions in this file, add #Help tags, e.g.:
@@ -42,18 +42,8 @@ if [[ -z $sourceMe ]]; then
         plain_new
         exit 0
     fi
-    read -n 1 -p  "Create new taskrc: [p]lain or [m]arkdown notebook?: "
-    case $REPLY in
-        [pP])
-            plain_new > taskrc
-            ;;
-        [mM])
-            markdown_new > taskrc.md
-            ;;
-        *)
-            exit 1
-            ;;
-    esac
+    plain_new > taskrc
+    echo "New taskrc created in $PWD: OK" >&2
 fi
 true
 
