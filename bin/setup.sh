@@ -45,7 +45,6 @@ main() {
     remove_pre_shellkit_content
     Script=${scriptName} main_base "$@"
     builtin cd ${HOME}/.local/bin || die 208
-    # TODO: kit-specific steps can be added here
 }
 
 [[ -z ${sourceMe} ]] && {

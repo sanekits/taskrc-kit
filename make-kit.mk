@@ -9,7 +9,10 @@
 #   or anything which generates those files.
 kit_depends := \
     bin/taskrc-kit.bashrc \
-    bin/taskrc-kit.sh
+	bin/taskrc.sh \
+	bin/taskrc_register_all.sh \
+	bin/taskrc_help \
+	bin/taskrc_new \
 
 .PHONY: publish
 
