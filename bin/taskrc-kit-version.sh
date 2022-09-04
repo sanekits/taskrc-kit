@@ -1,15 +1,26 @@
 #!/bin/bash
 
 # Running taskrc-kit-version.sh is the correct way to
-# get the home path for taskrc-kit and its tools.
-TaskrckitVersion=0.9.2
+# get the home install path for the tool
+KitVersion=0.1.0
 
-set -e
+canonpath() {
+    builtin type -t realpath.sh &>/dev/null && {
+        realpath.sh -f "$@"
+        return
+    }
+    builtin type -t readlink &>/dev/null && {
+        command readlink -f "$@"
+        return
+    }
+    # Fallback: Ok for rough work only, does not handle some corner cases:
+    ( builtin cd -L -- "$(command dirname -- $0)"; builtin echo "$(command pwd -P)/$(command basename -- $0)" )
+}
 
-Script=$(readlink -f "$0")
+Script=$(canonpath "$0")
 Scriptdir=$(dirname -- "$Script")
 
 
-if [ -z "$sourceMe" ]; then
-    printf "%s\t%s" ${Scriptdir} ${TaskrckitVersion}
+if [[ -z "$sourceMe" ]]; then
+    builtin printf "%s\t%s\n" ${Scriptdir} $KitVersion
 fi

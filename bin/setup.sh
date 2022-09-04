@@ -1,90 +1,44 @@
 #!/bin/bash
 # setup.sh for taskrc-kit
-
-die() {
-    echo "ERROR: $@" >&2
-    exit 1
-}
+#  This script is run from a temp dir after the self-install code has
+# extracted the install files.   The default behavior is provided
+# by the main_base() call, but after that you can add your own logic
+# and installation steps.
 
 canonpath() {
-    ( cd -L -- "$(dirname -- $0)"; echo "$(pwd -P)/$(basename -- $0)" )
-}
-
-Script=$(canonpath "$0")
-Scriptdir=$(dirname -- "$Script")
-inode() {
-    ( command ls -i "$1" | command awk '{print $1}') 2>/dev/null
+    builtin type -t realpath.sh &>/dev/null && {
+        realpath.sh -f "$@"
+        return
+    }
+    builtin type -t readlink &>/dev/null && {
+        command readlink -f "$@"
+        return
+    }
+    # Fallback: Ok for rough work only, does not handle some corner cases:
+    ( builtin cd -L -- "$(command dirname -- $0)"; builtin echo "$(command pwd -P)/$(command basename -- $0)" )
 }
 
 stub() {
-    echo "> > STUB: [$*] < < " >&2
+   builtin echo "  <<< STUB[$*] >>> " >&2
 }
+scriptName="$(canonpath  $0)"
+scriptDir=$(command dirname -- "${scriptName}")
 
-is_on_path() {
-    local tgt_dir="$1"
-    [[ -z $tgt_dir ]] && { true; return; }
-    local vv=( $(echo "${PATH}" | tr ':' '\n') )
-    for v in ${vv[@]}; do
-        if [[ $tgt_dir == $v ]]; then
-            return
-        fi
-    done
-    false
+source ${scriptDir}/shellkit/setup-base.sh
+
+die() {
+    builtin echo "ERROR(setup.sh): $*" >&2
+    builtin exit 1
 }
-
-path_fixup() {
-    # Add ~/.local/bin to the PATH if it's not already.  Modify
-    # either .bash_profile or .profile honoring bash startup rules.
-    local tgt_dir="$1"
-    if is_on_path "${tgt_dir}"; then
-        return
-    fi
-    local profile=$HOME/.bash_profile
-    [[ -f $profile ]] || profile=$HOME/.profile
-    echo 'export PATH=$HOME/.local/bin:$PATH # Added by taskrc-kit-setup.sh' >> ${profile} || die 202
-    echo "~/.local/bin added to your PATH." >&2
-    reload_reqd=true
-}
-
-shrc_fixup() {
-    # We must ensure that .bashrc sources our settings script and that the
-    # loader symlink is present
-    [[ ${TASKRCKIT_LOADER} == 1 ]] && {
-        echo "Shell init already sources taskrc-kit loader"
-        return
-    }
-    ln -sf ${HOME}/.local/bin/taskrc-kit/taskrc_loader ${HOME}/.taskrc-kit-loader
-    echo '[[ -n $PS1 && -e ${HOME}/.taskrc-kit-loader ]] && source ${HOME}/.taskrc-kit-loader # Added by taskrc-kit setup.sh' >> ${HOME}/.bashrc
-    echo "Added taskrc-kit loader to shell init"
-    reload_reqd=true
-}
-
 
 main() {
-    reload_reqd=false
-    echo "taskrc-kit setup args[$*]"
-    if [[ ! -d $HOME/.local/bin/taskrc-kit ]]; then
-        if [[ -e $HOME/.local/bin/taskrc-kit ]]; then
-            die "$HOME/.local/bin/taskrc-kit exists but is not a directory.  Refusing to overwrite"
-        fi
-        command mkdir -p $HOME/.local/bin/taskrc-kit || die "Failed creating $HOME/.local/bin/taskrc-kit"
-    fi
-    if [[ $(inode $Script) -eq $(inode ${HOME}/.local/bin/taskrc-kit/setup.sh) ]]; then
-        die "cannot run setup.sh from ${HOME}/.local/bin"
-    fi
-    builtin cd ${HOME}/.local/bin/taskrc-kit || die "101"
-    command rm -rf ./* || die "102"
-    [[ -d ${Scriptdir} ]] || die "bad Scriptdir [$Scriptdir]"
-    command cp -r ${Scriptdir}/* ./ || die "failed copying from ${Scriptdir} to $PWD"
-    builtin cd .. # Now we're in .local/bin
-    command ln -sf ./taskrc-kit/taskrc-kit-version.sh ./
-    for cmdx in taskrc_register_all.sh taskrc.sh taskrc_help taskrc_new; do
-        command ln -sf ./taskrc-kit/${cmdx} ./
-    done
-    path_fixup "$PWD" || die "102"
-    shrc_fixup || die "104"
-    $reload_reqd && builtin echo "Shell reload required ('bash -l')" >&2
-    true
+    Script=${scriptName} main_base "$@"
+    builtin cd ${HOME}/.local/bin || die 208
+    # TODO: kit-specific steps can be added here
 }
 
-[[ -z $sourceMe ]] && main "$@"
+[[ -z ${sourceMe} ]] && {
+    main "$@"
+    builtin exit
+}
+command true
