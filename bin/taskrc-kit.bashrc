@@ -5,6 +5,10 @@ taskrc-kit-semaphore() {
     [[ 1 -eq  1 ]]
 }
 
+[[ -f ${HOME}/.local/bin/taskrc-kit/taskrc-kit.bashrc ]] && {
+    export TASKRC_KIT_HOME=${HOME}/.local/bin/taskrc-kit
+}
+
 
 #  This should be sourced in the shell, it has no value as an external command.  Run 'taskrc.sh' if you want
 # a scriptable thing.

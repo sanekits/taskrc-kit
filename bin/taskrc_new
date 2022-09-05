@@ -4,15 +4,47 @@
 
 taskrc_dir=${taskrc_dir:-$PWD}
 
+die() {
+    echo "ERROR: $*" >&2
+    exit 1
+}
+
+canonpath() {
+    builtin type -t realpath.sh &>/dev/null && {
+        realpath.sh -f "$@"
+        return
+    }
+    builtin type -t readlink &>/dev/null && {
+        command readlink -f "$@"
+        return
+    }
+    # Fallback: Ok for rough work only, does not handle some corner cases:
+    ( builtin cd -L -- "$(command dirname -- $0)"; builtin echo "$(command pwd -P)/$(command basename -- $0)" )
+}
+
+function add_tkr_makesupport() {
+    # Included if the user wants makefile hook in ./taskrc
+    cat <<-EOF
+alias tmk='make -f \${taskrc_dir}/taskrc.mk'
+
+EOF
+}
+
 function plain_new {
-    cat << EOF
+    local make_support=$1
+    cat <<-EOF
 # taskrc for $(basename $PWD)
 # vim: filetype=sh :
 
 # If someone does a raw "source taskrc", we ensure that \$taskrc_dir gets defined anyway
-[[ -z \$taskrc_dir && -f taskrc ]] && export taskrc_dir=\$PWD
+[[ -z \$taskrc_dir && -f ./taskrc ]] && export taskrc_dir=\$PWD
 
-#type -t localhist_set >/dev/null && { localhist_set \${taskrc_dir}/bash_history;  echo "HISTFILE is \$HISTFILE"; }
+type -t localhist_set >/dev/null && {
+    alias tkr-lh="localhist_set \${taskrc_dir}/bash_history"
+    #Help: tkr-lh sets localhist to \${taskrc_dir}
+}
+
+$( $make_support 2>/dev/null )
 
 # Use taskrc -h for help on built-in taskrc functions.
 # To provide help for definitions in this file, add #Help tags, e.g.:
@@ -23,27 +55,33 @@ EOF
 
 }
 
-function markdown_new {
+function create_makefile() {
+    local dest="$1"
+    [[ -f "$dest" ]] && return $( die "Refusing to overwrite $1" )
+    local templName="${TASKRC_KIT_HOME}/templates/taskrc-template.mk"
+    [[ -f ${templName} ]] || return $( die "Can't find template ${templName}")
 
-    cat << EOF2
-## taskrc.md for $(basename $PWD)
-
-\`\`\`bash
-$(plain_new)
-\`\`\`
-EOF2
-
+    command sed -e "s%<TaskrcDir>%$(basename -- ${taskrc_dir})%g" ${templName} > "$dest" \
+        ||  return $(die "Failed creating ${dest} from ${templName}")
+    builtin echo "New taskrc.mk created in $(canonpath $dest):" >&2
+    builtin echo "   use \"tmk help\" to see targets." >&2
 }
 
 
 if [[ -z $sourceMe ]]; then
     cd ${taskrc_dir} || errExit "Can't cd to $taskrc_dir"
     if [[ $1 == "--cat" ]]; then
-        plain_new
+        plain_new add_tkr_makesupport
         exit 0
     fi
-    plain_new > taskrc
-    echo "New taskrc created in $PWD: OK" >&2
+    taskrc-kit-version.sh
+    [[ -f ./taskrc ]] && {
+        builtin echo "Refusing to overwrite existing $PWD/taskrc" >&2
+    } || {
+        plain_new add_tkr_makesupport > taskrc
+    }
+    create_makefile ./taskrc.mk
+    builtin echo "New taskrc created in $PWD: OK" >&2
 fi
 true
 
