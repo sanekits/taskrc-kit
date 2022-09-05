@@ -14,7 +14,7 @@ REMAKE := $(MAKE) -f $(lastword $(MAKEFILE_LIST))
 help:
 	@echo "Targets in $(basename $(lastword $(MAKEFILE_LIST))):" >&2
 	@$(REMAKE) -s --print-data-base --question no-such-target 2>/dev/null | \
-	grep -Ev  -e '^taskrc.mk' -e '^help' -e '^(Makefile|GNUmakefile|makefile|no-such-target)' | \
+	grep -Ev  -e 'taskrc.mk' -e '^help' -e '^(Makefile|GNUmakefile|makefile|no-such-target)' | \
 	awk '/^[^.%][-A-Za-z0-9_]*:/ \
 			{ print substr($$1, 1, length($$1)-1) }' | \
 	sort | \
