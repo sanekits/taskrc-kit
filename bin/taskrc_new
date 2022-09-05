@@ -25,7 +25,14 @@ canonpath() {
 function add_tkr_makesupport() {
     # Included if the user wants makefile hook in ./taskrc
     cat <<-EOF
-alias tmk='make -f \${taskrc_dir}/taskrc.mk'
+tmk() {
+#Help: tmk help -- list targets; tmk -e -- edit taskrc.mk
+    [[ \$1 == "-e" ]] || [[ \$1 == "--edit" ]] && {
+        $EDITOR \$taskrc_dir/taskrc.mk "\$@"
+    } || {
+        make -f \${taskrc_dir}/taskrc.mk "\$@"
+    }
+}
 
 EOF
 }
@@ -52,7 +59,7 @@ $( $make_support 2>/dev/null )
     #Help: my_func is my first and only function...
 # }
 EOF
-
+    true
 }
 
 function create_makefile() {
@@ -63,8 +70,6 @@ function create_makefile() {
 
     command sed -e "s%<TaskrcDir>%$(basename -- ${taskrc_dir})%g" ${templName} > "$dest" \
         ||  return $(die "Failed creating ${dest} from ${templName}")
-    builtin echo "New taskrc.mk created in $(canonpath $dest):" >&2
-    builtin echo "   use \"tmk help\" to see targets." >&2
 }
 
 
@@ -74,14 +79,22 @@ if [[ -z $sourceMe ]]; then
         plain_new add_tkr_makesupport
         exit 0
     fi
-    taskrc-kit-version.sh
+    taskrc-kit-version.sh >&2
     [[ -f ./taskrc ]] && {
         builtin echo "Refusing to overwrite existing $PWD/taskrc" >&2
     } || {
-        plain_new add_tkr_makesupport > taskrc
+        plain_new add_tkr_makesupport > taskrc \
+            && builtin echo "New taskrc created in $PWD: OK" >&2
     }
-    create_makefile ./taskrc.mk
-    builtin echo "New taskrc created in $PWD: OK" >&2
+    [[ -f ./taskrc.mk ]] && {
+        builtin echo "Refusing to overwrite existing $PWD/taskrc.mk" >&2
+    } || {
+        create_makefile ./taskrc.mk \
+        && {
+            builtin echo "New taskrc.mk created in $(canonpath ./taskrc.mk):" >&2
+            builtin echo "   use \"tmk help\" to see targets." >&2
+        }
+    }
 fi
 true
 

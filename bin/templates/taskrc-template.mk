@@ -7,7 +7,7 @@
 .PHONY: help
 help:
 	@$(MAKE) -s --print-data-base --question no-such-target 2>/dev/null | \
-	grep -v  -e '^taskrc.mk' -e '^help' | \
+	grep -Ev  -e '^taskrc.mk' -e '^help' -e '^(Makefile|GNUmakefile|makefile|no-such-target)' | \
 	awk '/^[^.%][-A-Za-z0-9_]*:/ \
 			{ print substr($$1, 1, length($$1)-1) }' | \
 	sort | \
