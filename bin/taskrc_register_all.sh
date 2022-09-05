@@ -10,8 +10,21 @@ function errExit {
     exit 1
 }
 
-mydir=$(dirname $0)
-[[ -f $mydir/taskrc-kit.bashrc ]] || errExit "Can't find dir for $0"
+canonpath() {
+    builtin type -t realpath.sh &>/dev/null && {
+        realpath.sh -f "$@"
+        return
+    }
+    builtin type -t readlink &>/dev/null && {
+        command readlink -f "$@"
+        return
+    }
+    # Fallback: Ok for rough work only, does not handle some corner cases:
+    ( builtin cd -L -- "$(command dirname -- $0)"; builtin echo "$(command pwd -P)/$(command basename -- $0)" )
+}
+
+mydir=$(canonpath $0)
+[[ -f $mydir/bin/taskrc-kit.bashrc ]] || errExit "Can't find dir for $0"
 
 function main {
     local topDir=${1:-$HOME}
