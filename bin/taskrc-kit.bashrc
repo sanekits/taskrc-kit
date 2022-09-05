@@ -5,6 +5,10 @@ taskrc-kit-semaphore() {
     [[ 1 -eq  1 ]]
 }
 
+[[ -f ${HOME}/.local/bin/taskrc-kit/taskrc-kit.bashrc ]] && {
+    export TASKRC_KIT_HOME=${HOME}/.local/bin/taskrc-kit
+}
+
 
 #  This should be sourced in the shell, it has no value as an external command.  Run 'taskrc.sh' if you want
 # a scriptable thing.
@@ -259,13 +263,11 @@ function taskrc_v5 {
         load=false
     fi
     if $new; then
-        [[ -e $(taskrc_filename .) ]] && ! $force && return $(errExit "Can't do --new unless you do --force: there's already a taskrc in $PWD")
         if ! taskrc_dir=$PWD taskrc_new; then
             return
         fi
         taskrc_dir=$PWD
         load=true
-        #edit=true
     fi
     if $edit; then
         has_taskrc $taskrc_dir || return $(errExit "No current taskrc to edit")
