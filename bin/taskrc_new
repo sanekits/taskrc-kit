@@ -28,6 +28,7 @@ function add_tkr_makesupport() {
 tmk() {
 #Help: tmk help -- list targets; tmk -e -- edit taskrc.mk
     [[ \$1 == "-e" ]] || [[ \$1 == "--edit" ]] && {
+        shift
         $EDITOR \$taskrc_dir/taskrc.mk "\$@"
     } || {
         make -f \${taskrc_dir}/taskrc.mk "\$@"
