@@ -31,7 +31,7 @@ tmk() {
         shift
         $EDITOR \$taskrc_dir/taskrc.mk "\$@"
     } || {
-        make -f \${taskrc_dir}/taskrc.mk "\$@"
+        command make -C \${taskrc_dir} -s -f \${taskrc_dir}/taskrc.mk "\$@"
     }
 }
 
