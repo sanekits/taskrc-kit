@@ -7,7 +7,7 @@
 
 # See https://stackoverflow.com/a/73509979/237059
 absdir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-
+SHELL := /bin/bash
 REMAKE := $(MAKE) -C $(absdir) -s -f $(lastword $(MAKEFILE_LIST))
 
 .PHONY: help
