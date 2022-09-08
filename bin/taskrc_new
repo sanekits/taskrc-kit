@@ -26,15 +26,21 @@ function add_tkr_makesupport() {
     # Included if the user wants makefile hook in ./taskrc
     cat <<-EOF
 tmk() {
-#Help: help -- list targets; tmk -e -- edit taskrc.mk
-    [[ \$1 == "-e" ]] || [[ \$1 == "--edit" ]] && {
-        shift
-        \$EDITOR \${taskrc_dir}/taskrc.mk "\$@"
-    } || {
-        command make -C \${taskrc_dir} -s -f \${taskrc_dir}/taskrc.mk "\$@"
-    }
+    #Help: help -- list targets; tmk -e -- edit taskrc.mk
+    case \$1 in
+        -e|--edit)
+            shift
+            $EDITOR \${taskrc_dir}/taskrc.mk "\$@"
+            return
+            ;;
+        -h|--help)
+            shift
+            command make -s -C \${taskrc_dir} -f \${taskrc_dir}/taskrc.mk help "\$@"
+            return
+            ;;
+    esac
+    command make -s -C \${taskrc_dir} -f \${taskrc_dir}/taskrc.mk "\$@"
 }
-
 EOF
 }
 
