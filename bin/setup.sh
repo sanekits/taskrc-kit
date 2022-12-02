@@ -18,6 +18,7 @@ canonpath() {
     ( builtin cd -L -- "$(command dirname -- $0)"; builtin echo "$(command pwd -P)/$(command basename -- $0)" )
 }
 
+
 stub() {
    builtin echo "  <<< STUB[$*] >>> " >&2
 }
@@ -32,17 +33,8 @@ die() {
     builtin exit 1
 }
 
-remove_pre_shellkit_content() {
-    for name in $HOME/.taskrc-kit-loader $HOME/.local/bin/taskrc* ; do
-        [[ -e "$name" ]] && {
-            builtin echo "Removing obsolete: $name" >&2
-            command rm -rf "${name}" || die "Failed removing ${name}"
-        };
-    done
-}
 
 main() {
-    remove_pre_shellkit_content
     Script=${scriptName} main_base "$@"
     builtin cd ${HOME}/.local/bin || die 208
 }
