@@ -16,6 +16,7 @@ kit_depends := \
 
 .PHONY: publish
 
+pre-publish: conformity-check
 
 publish: pre-publish publish-common release-draft-upload release-list
 
