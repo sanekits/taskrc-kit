@@ -4,6 +4,8 @@
 
 taskrc_dir=${taskrc_dir:-$PWD}
 
+PS4='\033[0;33m+$?(${BASH_SOURCE}:${LINENO}):\033[0m ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+
 die() {
     echo "ERROR: $*" >&2
     exit 1
@@ -25,38 +27,36 @@ canonpath() {
 function add_tkr_makesupport() {
     # Included if the user wants makefile hook in ./taskrc
     cat <<-EOF
-tmk() {
+function tmk {
     #Help: help -- list targets; tmk -e -- edit taskrc.mk
-    case \$1 in
+    case "\$1" in
         -e|--edit)
             shift
-            $EDITOR \${taskrc_dir}/taskrc.mk "\$@"
+            "$EDITOR" "\${taskrc_dir}/taskrc.mk" "\$@"
             return
             ;;
         -h|--help)
-            shift
-            command make -s -C \${taskrc_dir} -f \${taskrc_dir}/taskrc.mk help "\$@"
-            return
+            set -- help
             ;;
     esac
-    command make -s -C \${taskrc_dir} -f \${taskrc_dir}/taskrc.mk "\$@"
+    command make -s taskrc_dir="\${taskrc_dir}" PWD="\${PWD}" -C "\${taskrc_dir}" -f "\${taskrc_dir}/taskrc.mk" "\$@"
 }
+
+unalias tmk &>/dev/null  # This alias is a stub that must be removed once the user loads a taskrc context
 EOF
 }
 
 function plain_new {
     local make_support=$1
+
     cat <<-EOF
-# taskrc for $(basename $PWD)
+# taskrc for $(basename -- $PWD)
 # vim: filetype=sh :
 
 # If someone does a raw "source taskrc", we ensure that \$taskrc_dir gets defined anyway
-[[ -z \$taskrc_dir && -f ./taskrc ]] && export taskrc_dir=\$PWD
+[[ -z \$taskrc_dir && -f ./taskrc ]] \
+    && export taskrc_dir=\$PWD
 
-type -t localhist_set >/dev/null && {
-    alias tkr-lh="localhist_set \${taskrc_dir}/bash_history"
-    #Help: tkr-lh sets localhist to \${taskrc_dir}
-}
 
 $( $make_support 2>/dev/null )
 
@@ -71,12 +71,26 @@ EOF
 
 function create_makefile() {
     local dest="$1"
-    [[ -f "$dest" ]] && return $( die "Refusing to overwrite $1" )
+    [[ -f "$dest" ]] \
+        && return $( die "Refusing to overwrite $1" )
     local templName="${TASKRC_KIT_HOME}/templates/taskrc-template.mk"
-    [[ -f ${templName} ]] || return $( die "Can't find template ${templName}")
+    [[ -f ${templName} ]] \
+        || return $( die "Can't find template ${templName}")
 
-    command sed -e "s%<TaskrcDir>%$(basename -- ${taskrc_dir})%g" ${templName} > "$dest" \
+    local make_shebang=$'#!'$(which make 2>/dev/null)
+    case $make_shebang in
+        *make) ;;
+        *) make_shebang="#!/bin/make" ;;
+    esac
+
+
+    command sed \
+        -e "s%<TaskrcDir>%$(basename -- ${taskrc_dir})%g" \
+        -e "s|#shebang|${make_shebang}|" \
+        ${templName} > "$dest" \
         ||  return $(die "Failed creating ${dest} from ${templName}")
+
+    command chmod +x "$dest"
 }
 
 
@@ -87,21 +101,20 @@ if [[ -z $sourceMe ]]; then
         exit 0
     fi
     taskrc-kit-version.sh >&2
-    [[ -f ./taskrc ]] && {
+    if [[ -f ./taskrc ]]; then
         builtin echo "Refusing to overwrite existing $PWD/taskrc" >&2
-    } || {
+    else
         plain_new add_tkr_makesupport > taskrc \
             && builtin echo "New taskrc created in $PWD: OK" >&2
-    }
-    [[ -f ./taskrc.mk ]] && {
+    fi
+    if [[ -f ./taskrc.mk ]]; then
         builtin echo "Refusing to overwrite existing $PWD/taskrc.mk" >&2
-    } || {
+    else
         create_makefile ./taskrc.mk \
-        && {
-            builtin echo "New taskrc.mk created in $(canonpath ./taskrc.mk):" >&2
-            builtin echo "   use \"tmk help\" to see targets." >&2
+           && {
+             builtin echo "New taskrc.mk created in $(canonpath ./taskrc.mk):" >&2
+             builtin echo "   use \"tmk help\" to see targets." >&2
         }
-    }
+    fi
 fi
-true
 

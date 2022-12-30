@@ -13,15 +13,19 @@ taskrc-kit-semaphore() {
 #  This should be sourced in the shell, it has no value as an external command.  Run 'taskrc.sh' if you want
 # a scriptable thing.
 #
-#   taskrc is a shell helper for directory-specific 'taskrc' files.  A taskrc file is "your favorite shell definitions
-# that are focused on a particular project or task".
+#   taskrc is a shell helper for directory-specific 'taskrc' files.  A taskrc file is "your
+# favorite shell definitions that are focused on a particular project or task".
 #
 # Often the taskrc file is saved with a project source code base.
 #
 #
 
 declare -x taskrc_dir  # Directory of the most-recently-loaded taskrc file
-declare taskrc_load_time=0 # epoch timestamp (from ctime) for MRL taskrc, used for dirty detection
+declare taskrc_load_time=0 # epoch timestamp (from ctimetkr) for MRL taskrc, used for dirty detection
+
+lesstkr="less -FXRm"
+which less &>/dev/null \
+    || lesstkr=more
 
 
 function errExit {
@@ -29,13 +33,13 @@ function errExit {
     exit 1
 }
 
-function ctime {
+function ctimetkr {
     date +%s
 }
 
-# Stub debug-aid: paste and uncomment this line to invoke repl() where needed.
-# while read -ep "Stub 102:" stub; do repl "$stub" || break; done
-repl() {
+# Stub debug-aid: paste and uncomment this line to invoke repltkr() where needed.
+# while read -ep "Stub 102:" stub; do repltkr "$stub" || break; done
+repltkr() {
     local eval_txt="$1"
     [[ -z $eval_txt ]] && { false; return; }
     eval "$eval_txt"
@@ -48,27 +52,28 @@ function taskrc_is_dirty {
     local detail=false
     [[ $1 == "-pd" ]] && { print=true; detail=true; }
     [[ $1 == "-p" ]] && print=true
-    local cur=$(ctime $(taskrc_filename ${taskrc_dir}) )
+    local cur=$(ctimetkr $(taskrc_filename ${taskrc_dir}) )
     if (( $cur > $taskrc_load_time )); then
         if $print; then
-            echo -n "dirty"
+            builtin echo -n "dirty"
             if $detail; then
-                echo -n ": $cur > $taskrc_load_time"
+                builtin echo -n ": $cur > $taskrc_load_time"
             fi
         fi
-        echo ""
+        builtin echo ""
         true
         return
     fi
     if $print; then
-        echo -n "unchanged"
+        builtin echo -n "unchanged"
         if $detail; then
-            echo -n ": $taskrc_load_time"
+            builtin echo -n ": $taskrc_load_time"
         fi
-        echo ""
+        builtin echo ""
     fi
     false
 }
+
 
 function register_taskrc {
     local dir="$1"
@@ -76,11 +81,12 @@ function register_taskrc {
         [[ -f "$file" ]] || continue
         local xpath=$(readlink -f "$file")
         local xhash=$(echo "$xpath" | md5sum | cut -d ' ' -f 1)
-        [[ -L $HOME/.taskrc_reg/$xhash ]] && continue
+        [[ -L $HOME/.taskrc_reg/$xhash ]] \
+            && continue
         mkdir -p $HOME/.taskrc_reg
-        cd $HOME/.taskrc_reg
-        ln -sf "${xpath}" ./${xhash}
-        cd - &>/dev/null
+        builtin cd $HOME/.taskrc_reg
+        command ln -sf "${xpath}" ./${xhash}
+        builtin cd - &>/dev/null
     done
 }
 
@@ -98,7 +104,7 @@ function taskrc_md_filter {
                 xo=false;
                 continue
             fi
-            echo "$line"
+            builtin echo "$line"
         else
             if [[ "$line" == "\`\`\`bash" ]]; then
                 xo=true;
@@ -109,16 +115,15 @@ function taskrc_md_filter {
 }
 
 function cat_taskrc {
-    [[ -z "$1" || ! -d $1 ]] && return
-    [[ -f "$1/taskrc.md" ]] && taskrc_md_filter "$1/taskrc.md"
-    [[ -f "$1/taskrc" ]] && cat "$1/taskrc"
+    [[ -z "$1" || ! -d $1 ]] \
+        && return
+    [[ -f "$1/taskrc.md" ]] \
+        && taskrc_md_filter "$1/taskrc.md"
+    [[ -f "$1/taskrc" ]] \
+        && cat "$1/taskrc"
 }
+
 function source_taskrc {
-    if [[ $UID == 0 ]]; then
-        echo "ERROR: You can't safely source taskrc as root (UID==$UID). Hit Ctrl+C now or die." >&2
-        read -p ""
-        exit 1
-    fi
     # When "including" a taskrc within another, this is the
     # idiom:
     #   source_taskrc ../
@@ -126,13 +131,19 @@ function source_taskrc {
 }
 
 function taskrc_filename {
-    [[ -f $1/taskrc.md ]] && { echo "$1/taskrc.md"; return ; }
-    echo "$1/taskrc"
+    [[ -f $1/taskrc.md ]] && {
+        builtin echo "$1/taskrc.md";
+        return ;
+    }
+    builtin echo "$1/taskrc"
 }
 
 function taskrc_linecount {
-    [[ -z "$1" || ! -d $1 ]] && { echo 0 ; return; }
-    cat_taskrc $1 | wc -l
+    [[ -z "$1" || ! -d $1 ]] && {
+        echo 0 ;
+        return;
+    }
+    cat_taskrc $1 | command wc -l
 }
 
 function external_taskrc_call {
@@ -147,13 +158,19 @@ function external_taskrc_call {
     #
     # To make this work, we create a subshell, source taskrc, verify that a function exists matching $1,
     # and then eval the full command in that subshell.
-    [[ -z $taskrc_dir ]] && return $(errExit "Unknown arguments(0): $@ [no taskrc_dir]" )
-    has_taskrc $taskrc_dir || return $(errExit "Unknown arguments(1): $@ [no taskrc]")
+    [[ -z $taskrc_dir ]] \
+        && return $(errExit "Unknown arguments(0): $@ [no taskrc_dir]" )
+
+    has_taskrc $taskrc_dir \
+        || return $(errExit "Unknown arguments(1): $@ [no taskrc]")
+
     (
         source_taskrc $taskrc_dir
         funcname=$1
-        [[ -z $funcname ]] && errExit "Unknown arguments(2): $@ [taskrc_dir=$taskrc_dir]"
-        [[ $(type -t $funcname) == function ]] || errExit "$funcname is not a function"
+        [[ -z $funcname ]] \
+            && errExit "Unknown arguments(2): $@ [taskrc_dir=$taskrc_dir]"
+        [[ $(builtin type -t $funcname) == function ]] \
+            || errExit "$funcname is not a function"
         shift
         cmd="${funcname} $@"
         eval "$cmd"
@@ -165,13 +182,13 @@ function taskrc_dir_find {
     local search_up=$2 # search parent?
 
     if [[ -r $(taskrc_filename $xd) ]]; then
-        echo ${xd}
+        builtin echo ${xd}
         true
         return
     fi
     if $search_up; then
-        if [[ $(dirname $xd) != '/' ]]; then
-            taskrc_dir_find $(dirname $xd) $search_up  # Recurse
+        if [[ $(dirname -- $xd) != '/' ]]; then
+            taskrc_dir_find $(dirname -- $xd) $search_up  # Recurse
             return
         fi
     fi
@@ -179,7 +196,8 @@ function taskrc_dir_find {
 }
 
 # The 'v5' in this function name refers only to the function, not the entire taskrc-kit:
-function taskrc_v5 {
+function taskrc_v6 {
+
     local help=false       # -h, --help : print help for this function, then help for most recent taskrc
     local version=false    # -v, --version: print taskrc-kit version number
     local search_up=false  # -s, --search-up : find taskrc by searching parent dirs of .
@@ -187,13 +205,13 @@ function taskrc_v5 {
     local dump=false       # -d, --dump: print contents of most recent taskrc to stdout
     local info=false       # -i, --info: print information about most recent taskrc (path)
     local load=true        # Our default behavior is to find/load the taskrc
-    local force=false       # -f, --force: do the thing anyway
+    local force=false      # -f, --force: do the thing anyway
     local new=false        # -n, --new: create a new taskrc here .
     local edit=false       # -e, --edit: edit current taskrc, then reload
     local catt=false       # -c, --cat:  cat to stdout the latest new-file template
-    local inner_args       # Anything left over could be passed down
+    local inner_args=()    # Anything left over could be passed down
     while [[ ! -z $1 ]]; do
-        case $1 in
+        case "$1" in
             -h|--help)
                 help=true
                 load=false
@@ -241,7 +259,7 @@ function taskrc_v5 {
                 fi
                 # When extra args follow -h, they're treated as a search pattern
                 # so we should pass them along
-                inner_args="${inner_args} $1"
+                inner_args+=( $1 )
                 ;;
         esac
         shift
@@ -299,20 +317,20 @@ function taskrc_v5 {
                 return $(errExit "[ no refresh, $taskrc_dir/taskrc is unchanged. -f to force. ]")
             fi
         fi
-        pushd "$taskrc_dir" >/dev/null
-        echo -n "Refreshing $PWD/taskrc: ${BASHPID}["
+        builtin pushd "$taskrc_dir" >/dev/null
+        builtin echo -n "Refreshing $PWD/taskrc: ${BASHPID}["
         register_taskrc "${taskrc_dir}"
         source_taskrc "${taskrc_dir}"
-        taskrc_load_time=$(ctime $(taskrc_filename "$taskrc_dir" ))
-        echo "]  OK  @$(date)"
-        popd >/dev/null
+        taskrc_load_time=$(ctimetkr $(taskrc_filename "$taskrc_dir" ))
+        builtin echo "]  OK  @$(date)"
+        builtin popd >/dev/null
         load=false
     fi
 
     if $load; then
         # Now it's time to establish $taskrc_dir, having dispensed with other options:
         taskrc_dir=$(taskrc_dir_find $PWD $search_up)
-        #[[ -z $taskrc_dir ]] && return $(errExit "taskrc_dir not resolved")
+
         if [[ ! -r $(taskrc_filename "$taskrc_dir") ]]; then
             local pp=""
             if $search_up; then
@@ -322,7 +340,8 @@ function taskrc_v5 {
             fi
             return $(errExit "no taskrc file in ${PWD}${pp}")
         fi
-        pushd ${taskrc_dir} &>/dev/null || return $(errExit "Can't cd to ${taskrc_dir}")
+        pushd ${taskrc_dir} &>/dev/null \
+            || return $(errExit "Can't cd to ${taskrc_dir}")
         if $help; then
             egrep -v '^$' ./taskrc 2>/dev/null
             echo " >> done help: [${taskrc_dir}/taskrc]"
@@ -330,26 +349,25 @@ function taskrc_v5 {
         if $load; then
             echo "In [$PWD], loading taskrc into current shell:"
             source_taskrc .
-            taskrc_load_time=$(ctime $(taskrc_filename .))
+            taskrc_load_time=$(ctimetkr $(taskrc_filename .))
             echo " >> done, $(taskrc_linecount .) lines sourced."
         fi
         popd >/dev/null
     fi
     if $help; then
         local user_search_pattern=".*"
-        [[ -n $inner_args ]] && user_search_pattern=$inner_args
-        taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' 2>/dev/null | grep -E "$user_search_pattern" | less -FXRm
+        [[ -n $inner_args ]] \
+            && user_search_pattern="${inner_args[@]}"
+
+        taskrc_dir=$taskrc_dir taskrc_help | grep -v '^\s*$' 2>/dev/null | grep -E "$user_search_pattern" | $lesstkr
         load=false
     fi
 }
 
-alias taskrc='taskrc_v5'
-alias tkr='taskrc_v5'
-alias mk='make'
-complete -F _complete_alias mk
-
+alias taskrc='taskrc_v6'
+alias tkr='taskrc_v6'
 
 alias cd_taskrc='cd $taskrc_dir'
 alias cd_t='cd $taskrc_dir'
-
+alias tmk='echo "ERROR: run tkr first to load a taskrc context" >&2';
 

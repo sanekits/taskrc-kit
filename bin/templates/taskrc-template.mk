@@ -1,3 +1,4 @@
+#shebang
 # taskrc.mk for <TaskrcDir>
 #
 #  TODO: add targets for your project here.  When you run
@@ -8,6 +9,8 @@
 absdir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 SHELL := /bin/bash
 REMAKE := $(MAKE) -C $(absdir) -s -f $(lastword $(MAKEFILE_LIST))
+# PWD note: if you want the dir from which the tmk command ran,
+# Use $(PWD), not $$PWD in recipes.
 
 .PHONY: help
 help:
@@ -20,8 +23,9 @@ help:
 	pr --omit-pagination --width=100 --columns=3
 	@echo -e "absdir=\t\t$(absdir)"
 	@echo -e "CURDIR=\t\t$(CURDIR)"
-	@echo -e "taskrc_dir=\t$${taskrc_dir}"
+	@echo -e "PWD=\t\t$(PWD)"
+	@echo -e "taskrc_dir=\t$(taskrc_dir)"
 
 .PHONY: my-target-1
 my-target-1:
-	@echo "Hello my-target-1, PWD=$$PWD, taskrc_dir=$$taskrc_dir"
+	@echo "Hello my-target-1, PWD=$(PWD), taskrc_dir=$$taskrc_dir"
