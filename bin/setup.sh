@@ -18,11 +18,9 @@ canonpath() {
     ( builtin cd -L -- "$(command dirname -- $0)"; builtin echo "$(command pwd -P)/$(command basename -- $0)" )
 }
 
-
 stub() {
    builtin echo "  <<< STUB[$*] >>> " >&2
 }
-
 scriptName="$(canonpath  $0)"
 scriptDir=$(command dirname -- "${scriptName}")
 
@@ -33,10 +31,22 @@ die() {
     builtin exit 1
 }
 
-
 main() {
     Script=${scriptName} main_base "$@"
     builtin cd ${HOME}/.local/bin || die 208
+    # TODO: kit-specific steps can be added here
+
+    mkdir -p ${HOME}/.bash_completion.d
+    ln -sf ${HOME}/.local/bin/${Kitname}/tkr-autocomplete ${HOME}/.bash_completion.d/tkr
+
+
+    # FINALIZE: perms on ~/.local/bin/<Kitname>.  We want others/group to be
+    # able to traverse dirs and exec scripts, so that a source installation can
+    # be replicated to a dest from the same file system (e.g. docker containers,
+    # nfs-mounted home nets, etc)
+    command chmod og+rX ${HOME}/.local/bin/${Kitname} -R
+    command chmod og+rX ${HOME}/.local ${HOME}/.local/bin
+    true
 }
 
 [[ -z ${sourceMe} ]] && {

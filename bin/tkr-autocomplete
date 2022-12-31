@@ -1,0 +1,14 @@
+# tkr-autocomplete
+# vim: filetype=sh :
+
+_tkr() { # Shell completion for tkr. Place this file in ~/.bash_completion.d/tkr
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    # The main job is usually to set 'opts' to the set of meaningful commands:
+    opts="--help command1 command2"
+    COMPREPLY=( $(compgen -W "${opts}" -- "${cur}" ) )
+    return 0
+}
+
+complete -F _tkr tkr
