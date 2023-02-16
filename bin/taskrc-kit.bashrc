@@ -300,13 +300,13 @@ function taskrc_v6 {
             if has_taskrc . ;  then
                 read -p "No current taskrc to refresh, but there's a taskrc here. Load it? [Y/n]: "
                 if [[ $REPLY =~ [yY] ]] || [[ -z $REPLY ]]; then
-                    taskrc_v4
+                    taskrc_v6
                     return
                 fi
             else
                 read -p "No current taskrc or ./taskrc. Search parent dirs instead? [Y/n]: "
                 if [[ $REPLY =~ [yY] ]] || [[ -z $REPLY ]]; then
-                    taskrc_v4 -s
+                    taskrc_v6 -s
                     return
                 fi
             fi
